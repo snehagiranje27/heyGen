@@ -1,7 +1,8 @@
 import os
 from dotenv import load_dotenv
 
-load_dotenv()
+
+load_dotenv(os.path.join('./common/.env'))
 
 class Config:
     # Logging configuration
@@ -25,3 +26,6 @@ class Config:
     # Other common settings
     RETRY_DELAY = int(os.getenv('RETRY_DELAY', 5))  # Retry delay in seconds
     QUEUE_POLL_INTERVAL = int(os.getenv('QUEUE_POLL_INTERVAL', 1))  # Poll interval for queue
+    CLIENT_POLLING_TIMEOUT = int(os.getenv('CLIENT_POLLING_TIMEOUT', 5)) # in second
+    SERVER_POLLING_TIMEOUT = int(os.getenv('SERVER_POLLING_TIMEOUT', 5)) # in seconds
+
