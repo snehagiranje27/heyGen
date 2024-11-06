@@ -1,7 +1,7 @@
 import polling
 import logging
 
-from flask import Flask
+from flask import Flask, request
 
 from server.db import InMemoryDB
 from common.logger_setup import setup_logger
@@ -20,14 +20,30 @@ def get_terminating_status_or_none(id):
         return {"result" : status}
     return None
 
-@app.route('/<int:id>/status')
+@app.route('/ping', methods=['GET'])
+def ping():
+    """
+    Simple ping endpoint that returns pong, just to check if server is up or not.
+    """
+    return {"result": "pong"}, 200
+
+@app.route('/<int:id>/status', methods=['GET'])
 def get_status(id: int):
+    poll = request.args.get('poll', 'false').lower() == 'true'
+    if not poll:
+        try:
+            status = db.get_status(id)
+            logging.info(f"Retrieved current status for ID {id}: {status}")
+            return {"result": status}
+        except Exception as e:
+            logging.error(f"Failed to get status for ID {id}, Error: {str(e)}")
+            return {"error": "An unexpected error occurred"}, 500
     try:
         logging.info(f"Status check request for ID {id}")
         return polling.poll(
             lambda: get_terminating_status_or_none(id),
             step=1,
-            timeout=5
+            timeout=Config.SERVER_POLLING_TIMEOUT
         )
     except polling.TimeoutException:
         logging.warning(f"Timed out for ID {id}. Status is still pending.")
