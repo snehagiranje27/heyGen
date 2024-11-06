@@ -57,7 +57,7 @@ class Client:
                 id = self.id_queue.get()
                 logging.info(f"Processing ID {id}")
                 try:
-                    status = self.server_poller.get_status(id=id)
+                    status = self.server_poller.get_status(id=id, timeout_in_sec=Config.CLIENT_POLLING_TIMEOUT)
                     logging.info(f"Received status for ID {id}: {status}")
                     self.update_id_status(id, status)
                 except Exception as e:
